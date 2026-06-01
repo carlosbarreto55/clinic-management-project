@@ -1,0 +1,74 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "orchestrator",
+  "agent": {
+    "orchestrator": {
+      "description": "Primary orchestrator that enforces the Git Guardian → Architect → TDD Tester → Developer → Security Analyst → Tester → Code Reviewer → Git Guardian workflow loop.",
+      "mode": "primary",
+      "model": "opencode-go/kimi-k2.6"
+    },
+    "architect": {
+      "description": "Analyzes requirements and produces implementation plans and interface contracts.",
+      "mode": "subagent",
+      "model": "opencode-go/kimi-k2.6",
+      "permission": {
+        "edit": "deny",
+        "bash": "allow"
+      }
+    },
+    "tdd-tester": {
+      "description": "Writes failing tests before any code is written for new features.",
+      "mode": "subagent",
+      "model": "opencode-go/kimi-k2.6",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow"
+      }
+    },
+    "developer": {
+      "description": "Implements code based on architect plans and tester specs.",
+      "mode": "subagent",
+      "model": "opencode-go/kimi-k2.6",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow"
+      }
+    },
+    "security-analyst": {
+      "description": "Reviews every code change for security vulnerabilities and compliance.",
+      "mode": "subagent",
+      "model": "opencode-go/kimi-k2.6",
+      "permission": {
+        "edit": "deny",
+        "bash": "allow"
+      }
+    },
+    "tester": {
+      "description": "Runs and validates tests for refactors, bug fixes, and final verification.",
+      "mode": "subagent",
+      "model": "opencode-go/kimi-k2.6",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow"
+      }
+    },
+    "code-reviewer": {
+      "description": "Final quality gate reviewing style, patterns, and project conventions.",
+      "mode": "subagent",
+      "model": "opencode-go/kimi-k2.6",
+      "permission": {
+        "edit": "deny",
+        "bash": "allow"
+      }
+    },
+    "git-guardian": {
+      "description": "Enforces git rules — conventional commits, branch discipline, no destructive commands.",
+      "mode": "subagent",
+      "model": "opencode-go/kimi-k2.6",
+      "permission": {
+        "edit": "deny",
+        "bash": "allow"
+      }
+    }
+  }
+}
