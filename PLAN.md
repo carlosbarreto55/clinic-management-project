@@ -10,13 +10,13 @@
 |-------|------|-------|-----------|-----------|--------|
 | 0 | Project Setup | 4 | 4 | 0 | ✅ Complete |
 | 1 | Database & Entities | 4 | 4 | 0 | ✅ Complete |
-| 2 | Authentication | 3 | 0 | 3 | ⬜ Not Started |
+| 2 | Authentication | 3 | 3 | 0 | ✅ Complete |
 | 3 | Services & Staff | 2 | 0 | 2 | ⬜ Not Started |
 | 4 | Appointments CRUD | 6 | 0 | 6 | ⬜ Not Started |
 | 5 | Real-Time Streaming | 3 | 0 | 3 | ⬜ Not Started |
 | 6 | Integrations | 3 | 0 | 3 | ⬜ Not Started |
 | 7 | Security Hardening & Review | 3 | 0 | 3 | ⬜ Not Started |
-| **Overall** | | **28** | **8** | **20** | 🟡 29% |
+| **Overall** | | **28** | **11** | **17** | 🟡 39% |
 
 ---
 
@@ -48,13 +48,13 @@
 
 ## Phase 2: Authentication
 
-- **Status**: ⬜ Not Started
+- **Status**: ✅ Complete
 
 | ID | Task | Status |
 |----|------|--------|
-| AUTH-01 | Create JWT utility (`JwtUtil` — generate token, validate token, extract claims) | ⬜ Pending |
-| AUTH-02 | Create `POST /api/auth/login` endpoint + `AuthService` (validate credentials, return JWT) | ⬜ Pending |
-| AUTH-03 | Create `SecurityConfig` — Spring Security filter chain: permit `/api/auth/**`, require JWT on all other endpoints, stateless session | ⬜ Pending |
+| AUTH-01 | Create JWT utility (`JwtUtil` — generate token, validate token, extract claims) | ✅ Completed (2026-06-01) |
+| AUTH-02 | Create `POST /api/auth/login` endpoint + `AuthService` (validate credentials, return JWT) | ✅ Completed (2026-06-01) |
+| AUTH-03 | Create `SecurityConfig` — Spring Security filter chain: permit `/api/auth/**`, require JWT on all other endpoints, stateless session | ✅ Completed (2026-06-01) |
 
 ---
 
