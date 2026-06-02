@@ -1,7 +1,7 @@
 ---
 description: Runs and validates tests for refactors, bug fixes, and final verification.
 mode: subagent
-model: opencode-go/kimi-k2.6
+model: opencode-go/mimo-v2.5-pro
 permission:
   edit: allow
   bash: allow

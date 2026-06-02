@@ -8,53 +8,53 @@
 
 | Phase | Name | Tasks | Completed | Remaining | Status |
 |-------|------|-------|-----------|-----------|--------|
-| 0 | Project Setup | 4 | 0 | 4 | ⬜ Not Started |
-| 1 | Database & Entities | 4 | 0 | 4 | ⬜ Not Started |
-| 2 | Authentication | 3 | 0 | 3 | ⬜ Not Started |
+| 0 | Project Setup | 4 | 4 | 0 | ✅ Complete |
+| 1 | Database & Entities | 4 | 4 | 0 | ✅ Complete |
+| 2 | Authentication | 3 | 3 | 0 | ✅ Complete |
 | 3 | Services & Staff | 2 | 0 | 2 | ⬜ Not Started |
 | 4 | Appointments CRUD | 6 | 0 | 6 | ⬜ Not Started |
 | 5 | Real-Time Streaming | 3 | 0 | 3 | ⬜ Not Started |
 | 6 | Integrations | 3 | 0 | 3 | ⬜ Not Started |
 | 7 | Security Hardening & Review | 3 | 0 | 3 | ⬜ Not Started |
-| **Overall** | | **28** | **0** | **28** | ⬜ 0% |
+| **Overall** | | **28** | **11** | **17** | 🟡 39% |
 
 ---
 
 ## Phase 0: Project Setup
 
-- **Status**: ⬜ Not Started
+- **Status**: ✅ Complete
 
 | ID | Task | Status |
 |----|------|--------|
-| SETUP-01 | Add Maven dependencies (spring-boot-starter-data-jpa, mysql-connector-j, spring-boot-starter-validation, jjwt-api/impl/jackson) | ⬜ Pending |
-| SETUP-02 | Configure `application.yaml` (MySQL datasource, JPA/Hibernate, JWT secret/expiry, server port, logging) | ⬜ Pending |
-| SETUP-03 | Write `compose.yaml` with MySQL 8.0 service (health check, volume, credentials) | ⬜ Pending |
-| SETUP-04 | Create base package structure (`controller`, `service`, `repository`, `entity`, `dto`, `config`, `event`, `exception`) | ⬜ Pending |
+| SETUP-01 | Add Maven dependencies (spring-boot-starter-data-jpa, mysql-connector-j, spring-boot-starter-validation, jjwt-api/impl/jackson) | ✅ Completed (2026-06-01) |
+| SETUP-02 | Configure `application.yaml` (MySQL datasource, JPA/Hibernate, JWT secret/expiry, server port, logging) | ✅ Completed (2026-06-01) |
+| SETUP-03 | Write `compose.yaml` with MySQL 8.0 service (health check, volume, credentials) | ✅ Completed (2026-06-01) |
+| SETUP-04 | Create base package structure (`controller`, `service`, `repository`, `entity`, `dto`, `config`, `event`, `exception`) | ✅ Completed (2026-06-01) |
 
 ---
 
 ## Phase 1: Database & Entities
 
-- **Status**: ⬜ Not Started
+- **Status**: ✅ Complete
 
 | ID | Task | Status |
 |----|------|--------|
-| DB-01 | Create `User` entity (`id`, `email`, `passwordHash`, `role`) + `UserRepository` | ⬜ Pending |
-| DB-02 | Create `Staff` entity (`id`, `name`, `userId` FK) + `StaffRepository` | ⬜ Pending |
-| DB-03 | Create `Service` entity (`id`, `name`, `price`, `durationMinutes`) + `ServiceRepository` | ⬜ Pending |
-| DB-04 | Create `Appointment` entity (`id`, `clientName`, `startTime`, `endTime`, `status`, `type`, `serviceId` FK, `staffId` FK, `createdAt`, `updatedAt`) + `AppointmentRepository` | ⬜ Pending |
+| DB-01 | Create `User` entity (`id`, `email`, `passwordHash`, `role`) + `UserRepository` | ✅ Completed (2026-06-01) |
+| DB-02 | Create `Staff` entity (`id`, `name`, `userId` FK) + `StaffRepository` | ✅ Completed (2026-06-01) |
+| DB-03 | Create `Service` entity (`id`, `name`, `price`, `durationMinutes`) + `ServiceRepository` | ✅ Completed (2026-06-01) |
+| DB-04 | Create `Appointment` entity (`id`, `clientName`, `startTime`, `endTime`, `status`, `type`, `serviceId` FK, `staffId` FK, `createdAt`, `updatedAt`) + `AppointmentRepository` | ✅ Completed (2026-06-01) |
 
 ---
 
 ## Phase 2: Authentication
 
-- **Status**: ⬜ Not Started
+- **Status**: ✅ Complete
 
 | ID | Task | Status |
 |----|------|--------|
-| AUTH-01 | Create JWT utility (`JwtUtil` — generate token, validate token, extract claims) | ⬜ Pending |
-| AUTH-02 | Create `POST /api/auth/login` endpoint + `AuthService` (validate credentials, return JWT) | ⬜ Pending |
-| AUTH-03 | Create `SecurityConfig` — Spring Security filter chain: permit `/api/auth/**`, require JWT on all other endpoints, stateless session | ⬜ Pending |
+| AUTH-01 | Create JWT utility (`JwtUtil` — generate token, validate token, extract claims) | ✅ Completed (2026-06-01) |
+| AUTH-02 | Create `POST /api/auth/login` endpoint + `AuthService` (validate credentials, return JWT) | ✅ Completed (2026-06-01) |
+| AUTH-03 | Create `SecurityConfig` — Spring Security filter chain: permit `/api/auth/**`, require JWT on all other endpoints, stateless session | ✅ Completed (2026-06-01) |
 
 ---
 
