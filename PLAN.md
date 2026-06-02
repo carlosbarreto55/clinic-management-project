@@ -11,12 +11,12 @@
 | 0 | Project Setup | 4 | 4 | 0 | ✅ Complete |
 | 1 | Database & Entities | 4 | 4 | 0 | ✅ Complete |
 | 2 | Authentication | 3 | 3 | 0 | ✅ Complete |
-| 3 | Services & Staff | 2 | 0 | 2 | ⬜ Not Started |
+| 3 | Services & Staff | 2 | 2 | 0 | ✅ Complete |
 | 4 | Appointments CRUD | 6 | 0 | 6 | ⬜ Not Started |
 | 5 | Real-Time Streaming | 3 | 0 | 3 | ⬜ Not Started |
 | 6 | Integrations | 3 | 0 | 3 | ⬜ Not Started |
 | 7 | Security Hardening & Review | 3 | 0 | 3 | ⬜ Not Started |
-| **Overall** | | **28** | **11** | **17** | 🟡 39% |
+| **Overall** | | **28** | **13** | **15** | 🟡 46% |
 
 ---
 
@@ -60,12 +60,12 @@
 
 ## Phase 3: Services & Staff
 
-- **Status**: ⬜ Not Started
+- **Status**: ✅ Complete
 
 | ID | Task | Status |
 |----|------|--------|
-| STAFF-01 | Create `GET /api/services` endpoint — return all services (id, name, price, durationMinutes) | ⬜ Pending |
-| STAFF-02 | Create `GET /api/staff` endpoint — return all active staff (id, name) | ⬜ Pending |
+| STAFF-01 | Create `GET /api/services` endpoint — return all services (id, name, price, durationMinutes) | ✅ Completed (2026-06-02) |
+| STAFF-02 | Create `GET /api/staff` endpoint — return all active staff (id, name) | ✅ Completed (2026-06-02) |
 
 ---
 
