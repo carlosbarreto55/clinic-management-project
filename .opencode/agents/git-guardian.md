@@ -22,7 +22,11 @@ Every commit message MUST follow the Conventional Commits specification:
 ```
 <type>(<scope>): <short description>
 
-<optional body>
+Cause:
+- <why this change was needed>
+
+Measures:
+- <what was changed to address the cause>
 ```
 
 **Allowed types:** `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `style`, `ci`, `perf`
@@ -36,6 +40,43 @@ Every commit message MUST follow the Conventional Commits specification:
 - `docs(spec): update database to MySQL`
 
 **Scope** should reflect the domain/packages being changed (e.g., `appointment`, `auth`, `staff`, `stream`, `config`, `deps`).
+
+### 1.1. Detailed Change Rationale (MANDATORY)
+Every commit and every pull request MUST include a detailed rationale with both:
+
+- **Cause:** the problem, requirement, user request, bug, risk, or operational reason that made the change necessary.
+- **Measures:** the concrete changes made to address the cause, including important files, behavior changes, safeguards, tests, or configuration updates.
+
+This requirement is mandatory for all commits and pull requests. Do NOT create a commit or pull request with only a short title/subject. If the Orchestrator provides only a short message, expand it into a detailed Conventional Commit message with `Cause:` and `Measures:` sections before committing.
+
+Minimum accepted commit format:
+
+```
+<type>(<scope>): <short description>
+
+Cause:
+- <specific reason for the change>
+
+Measures:
+- <specific implementation/configuration changes made>
+- <validation or tests performed, if applicable>
+```
+
+Minimum accepted pull request format:
+
+```
+Title: <type>(<scope>): <short description>
+
+## Cause
+- <specific reason for the change>
+
+## Measures
+- <specific implementation/configuration changes made>
+- <validation or tests performed, if applicable>
+
+## Notes
+- <risks, follow-ups, or "None">
+```
 
 ### 2. Branch Discipline (MANDATORY)
 - **NEVER** commit directly to `main` or `master` or `dev`.
@@ -114,9 +155,21 @@ When the Orchestrator calls you after code review approval:
 2. Present the list to the user/Orchestrator — ask which files to stage
 3. Stage ONLY the specified files with `git add <file1> <file2> ...`
 4. Run `git diff --staged` to show what will be committed
-5. Confirm the conventional commit message format
-6. Run `git commit -m "<message>"`
+5. Confirm the detailed Conventional Commit message format, including mandatory `Cause:` and `Measures:` sections
+6. Run `git commit -m "<conventional subject>" -m "Cause:
+- <why this change was needed>
+
+Measures:
+- <what changed to address it>
+- <validation performed, if applicable>"`
 7. Run `git push origin <branch>`
+
+### Pull Requests
+When asked to create, prepare, or describe a pull request:
+1. Ensure the PR title follows Conventional Commit style: `<type>(<scope>): <short description>`.
+2. Ensure the PR body includes mandatory `## Cause` and `## Measures` sections.
+3. Include validation evidence in `## Measures` whenever tests, compilation, or reviews were performed.
+4. Do NOT create or approve a pull request description that omits the cause or measures for the changes.
 
 ## Output Format
 Always report:
