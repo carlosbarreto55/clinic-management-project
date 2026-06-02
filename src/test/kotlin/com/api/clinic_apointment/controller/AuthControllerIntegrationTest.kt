@@ -1,5 +1,6 @@
 package com.api.clinic_apointment.controller
 
+import com.api.clinic_apointment.config.LoginRateLimiter
 import com.api.clinic_apointment.entity.User
 import com.api.clinic_apointment.repository.UserRepository
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -25,11 +26,13 @@ class AuthControllerIntegrationTest @Autowired constructor(
     private val mockMvc: MockMvc,
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val loginRateLimiter: LoginRateLimiter
 ) {
 
     @BeforeEach
     fun setUp() {
+        loginRateLimiter.resetAll()
         userRepository.deleteAll()
         val user = User(
             email = "test@clinic.com",
@@ -78,6 +81,27 @@ class AuthControllerIntegrationTest @Autowired constructor(
     }
 
     @Test
+    fun `POST to login is rate limited after repeated failures`() {
+        val loginRequest = """{"email":"test@clinic.com","password":"wrongPassword"}"""
+
+        repeat(5) {
+            mockMvc.perform(
+                post("/api/auth/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(loginRequest)
+            )
+                .andExpect(status().isUnauthorized)
+        }
+
+        mockMvc.perform(
+            post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginRequest)
+        )
+            .andExpect(status().isTooManyRequests)
+    }
+
+    @Test
     fun `POST to login with blank email returns 400`() {
         val loginRequest = """{"email":"","password":"password123"}"""
 
@@ -99,6 +123,54 @@ class AuthControllerIntegrationTest @Autowired constructor(
                 .content(loginRequest)
         )
             .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `POST to login with invalid email returns 400`() {
+        val loginRequest = """{"email":"not-an-email","password":"password123"}"""
+
+        mockMvc.perform(
+            post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginRequest)
+        )
+            .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `POST to login with oversized email returns 400`() {
+        val longEmail = "a".repeat(245) + "@clinic.com"
+        val loginRequest = objectMapper.writeValueAsString(mapOf("email" to longEmail, "password" to "password123"))
+
+        mockMvc.perform(
+            post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginRequest)
+        )
+            .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `POST to login with oversized password returns 400`() {
+        val loginRequest = objectMapper.writeValueAsString(
+            mapOf("email" to "test@clinic.com", "password" to "a".repeat(129))
+        )
+
+        mockMvc.perform(
+            post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginRequest)
+        )
+            .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `login rate limiter bounds tracked source keys`() {
+        repeat(10_500) { index ->
+            loginRateLimiter.recordFailure("192.0.2.$index")
+        }
+
+        org.assertj.core.api.Assertions.assertThat(loginRateLimiter.attemptCountForTesting()).isLessThanOrEqualTo(10_000)
     }
 
     @Test

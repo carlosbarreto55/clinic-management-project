@@ -1,7 +1,7 @@
 # Development configuration. Override via environment variables in production.
 #   DB_USERNAME / DB_PASSWORD  — database credentials (never commit real passwords).
-#   For local development only: set DB_USERNAME/DB_PASSWORD env vars or these defaults will be used.
-#   In production, always set DB_USERNAME and DB_PASSWORD to real credentials.
+#   For local development only: set DB_USERNAME/DB_PASSWORD env vars or use a local ignored config file.
+#   In all environments, set DB_PASSWORD explicitly.
 #   JWT_SECRET                  — 256+ bit random key, base64-encoded (never commit the real secret). REQUIRED — startup fails if unset.
 
 spring:
@@ -11,7 +11,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/clinic_appointment?allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: ${DB_USERNAME:clinic_user}
-    password: ${DB_PASSWORD:clinic_pass}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -33,3 +33,7 @@ logging:
 jwt:
   secret: ${JWT_SECRET}
   expiration-ms: 86400000
+
+security:
+  appointments:
+    rbac-enabled: false
