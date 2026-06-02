@@ -1,7 +1,7 @@
 ---
 description: Writes failing tests before any code is written for new features.
 mode: subagent
-model: opencode-go/kimi-k2.6
+model: opencode-go/mimo-v2.5-pro
 permission:
   edit: allow
   bash: allow

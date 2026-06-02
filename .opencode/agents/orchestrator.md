@@ -1,7 +1,7 @@
 ---
 description: Primary orchestrator that enforces the Git Guardian → Architect → TDD Tester → Developer → Security Analyst → Tester → Code Reviewer → Git Guardian workflow loop.
 mode: primary
-model: opencode-go/deepseek-v4-pro
+model: openai/gpt-5.5
 ---
 
 # Orchestrator

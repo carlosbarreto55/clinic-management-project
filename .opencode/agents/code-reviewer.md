@@ -1,7 +1,7 @@
 ---
 description: Final quality gate reviewing style, patterns, and project conventions.
 mode: subagent
-model: opencode-go/deepseek-v4-pro
+model: opencode-go/mimo-v2.5-pro
 permission:
   edit: deny
   bash: allow

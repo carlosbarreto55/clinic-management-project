@@ -1,7 +1,7 @@
 ---
 description: Reviews every code change for security vulnerabilities and compliance.
 mode: subagent
-model: opencode-go/deepseek-v4-pro
+model: opencode-go/mimo-v2.5-pro
 permission:
   edit: deny
   bash: allow

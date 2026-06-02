@@ -1,7 +1,7 @@
 ---
 description: Enforces git rules — conventional commits, branch discipline, no destructive commands.
 mode: subagent
-model: opencode-go/kimi-k2.6
+model: opencode-go/mimo-v2.5-pro
 permission:
   edit: deny
   bash: allow

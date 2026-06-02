@@ -1,7 +1,7 @@
 ---
 description: Implements code based on architect plans and tester specs.
 mode: subagent
-model: opencode-go/deepseek-v4-pro
+model: opencode-go/mimo-v2.5-pro
 permission:
   edit: allow
   bash: allow

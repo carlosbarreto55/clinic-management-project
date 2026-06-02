@@ -1,7 +1,7 @@
 ---
 description: Analyzes requirements and produces implementation plans and interface contracts.
 mode: subagent
-model: opencode-go/deepseek-v4-pro
+model: openai/gpt-5.5
 permission:
   edit: deny
   bash: allow
