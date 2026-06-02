@@ -134,3 +134,11 @@ Phase 0 ──► Phase 1 ──► Phase 2 ──► Phase 3
 ```
 
 Phases 0–2 are sequential. Phases 3–6 can partially overlap once Phase 2 auth is done. Phase 7 is the final gate.
+
+---
+
+## Extra Completed Tasks
+
+| ID | Task | Status |
+|----|------|--------|
+| EXTRA-01 | Add disabled-by-default feature flag for future appointment RBAC enforcement (`security.appointments.rbac-enabled`) | ✅ Completed (2026-06-02) |

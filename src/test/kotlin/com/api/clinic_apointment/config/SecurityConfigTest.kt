@@ -33,7 +33,7 @@ class SecurityConfigTest @Autowired constructor(
         val user = User(
             email = "test@clinic.com",
             passwordHash = passwordEncoder.encode("password123"),
-            role = "RECEPTIONIST"
+            role = "STAFF"
         )
         userRepository.save(user)
     }
@@ -60,7 +60,7 @@ class SecurityConfigTest @Autowired constructor(
     }
 
     @Test
-    fun `GET to appointments with valid token does not return 401`() {
+    fun `GET appointments with STAFF token is allowed when appointment RBAC flag is disabled by default`() {
         val loginRequest = """{"email":"test@clinic.com","password":"password123"}"""
 
         val loginResponse = mockMvc.perform(
