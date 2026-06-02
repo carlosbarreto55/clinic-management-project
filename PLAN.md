@@ -12,11 +12,11 @@
 | 1 | Database & Entities | 4 | 4 | 0 | ✅ Complete |
 | 2 | Authentication | 3 | 3 | 0 | ✅ Complete |
 | 3 | Services & Staff | 2 | 2 | 0 | ✅ Complete |
-| 4 | Appointments CRUD | 6 | 0 | 6 | ⬜ Not Started |
+| 4 | Appointments CRUD | 6 | 6 | 0 | ✅ Complete |
 | 5 | Real-Time Streaming | 3 | 0 | 3 | ⬜ Not Started |
 | 6 | Integrations | 3 | 0 | 3 | ⬜ Not Started |
 | 7 | Security Hardening & Review | 3 | 0 | 3 | ⬜ Not Started |
-| **Overall** | | **28** | **13** | **15** | 🟡 46% |
+| **Overall** | | **28** | **19** | **9** | 🟡 68% |
 
 ---
 
@@ -71,16 +71,16 @@
 
 ## Phase 4: Appointments CRUD
 
-- **Status**: ⬜ Not Started
+- **Status**: ✅ Complete
 
 | ID | Task | Status |
 |----|------|--------|
-| APPT-01 | Create `GET /api/appointments` — query by `startDate`/`endDate`, return appointment list | ⬜ Pending |
-| APPT-02 | Create `POST /api/appointments` — create appointment/LOCK with date/time overlap validation (database-level: same staff, overlapping range, non-cancelled). Publish `AppointmentEvent` on success | ⬜ Pending |
-| APPT-03 | Create `GET /api/appointments/{id}` — return single appointment details | ⬜ Pending |
-| APPT-04 | Create `DELETE /api/appointments/{id}` — soft delete (status → CANCELLED). Publish `AppointmentEvent` | ⬜ Pending |
-| APPT-05 | Create `AppointmentEvent` and async event publisher configuration (`@EnableAsync`, event listener skeleton) | ⬜ Pending |
-| APPT-06 | Create DTOs (`AppointmentRequest`, `AppointmentResponse`, `AppointmentEventPayload`) | ⬜ Pending |
+| APPT-01 | Create `GET /api/appointments` — query by `startDate`/`endDate`, return appointment list | ✅ Completed (2026-06-02) |
+| APPT-02 | Create `POST /api/appointments` — create appointment/LOCK with date/time overlap validation (database-level: same staff, overlapping range, non-cancelled). Publish `AppointmentEvent` on success | ✅ Completed (2026-06-02) |
+| APPT-03 | Create `GET /api/appointments/{id}` — return single appointment details | ✅ Completed (2026-06-02) |
+| APPT-04 | Create `DELETE /api/appointments/{id}` — soft delete (status → CANCELLED). Publish `AppointmentEvent` | ✅ Completed (2026-06-02) |
+| APPT-05 | Create `AppointmentEvent` and async event publisher configuration (`@EnableAsync`, event listener skeleton) | ✅ Completed (2026-06-02) |
+| APPT-06 | Create DTOs (`AppointmentRequest`, `AppointmentResponse`, `AppointmentEventPayload`) | ✅ Completed (2026-06-02) |
 
 ---
 
