@@ -15,8 +15,8 @@
 | 4 | Appointments CRUD | 6 | 6 | 0 | ✅ Complete |
 | 5 | Real-Time Streaming | 3 | 0 | 3 | ⬜ Not Started |
 | 6 | Integrations | 3 | 0 | 3 | ⬜ Not Started |
-| 7 | Security Hardening & Review | 3 | 0 | 3 | ⬜ Not Started |
-| **Overall** | | **28** | **19** | **9** | 🟡 68% |
+| 7 | Security Hardening & Review | 3 | 1 | 2 | 🔄 In Progress |
+| **Overall** | | **28** | **20** | **8** | 🟡 71% |
 
 ---
 
@@ -110,11 +110,11 @@
 
 ## Phase 7: Security Hardening & Review
 
-- **Status**: ⬜ Not Started
+- **Status**: 🔄 In Progress
 
 | ID | Task | Status |
 |----|------|--------|
-| SEC-01 | Role-based access control: define roles (ADMIN, STAFF, RECEPTIONIST), enforce on endpoints via `@PreAuthorize` or URL-based rules | ⬜ Pending |
+| SEC-01 | Ownership-based appointment authorization: authenticated staff can only create, change, or delete appointments for their own `staffId` | ✅ Completed (2026-06-02) |
 | SEC-02 | Input validation review — ensure all endpoints validate input (DTO validation, path variables, query params). Add `@Valid` everywhere | ⬜ Pending |
 | SEC-03 | Final security audit — no hardcoded secrets, no PII in logs, CORS restrictive, rate limiting on auth endpoint, SQL injection review (JPA parameterized queries) | ⬜ Pending |
 

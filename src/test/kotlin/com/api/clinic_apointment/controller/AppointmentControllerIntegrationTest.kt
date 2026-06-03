@@ -48,6 +48,7 @@ class AppointmentControllerIntegrationTest @Autowired constructor(
 ) {
     private lateinit var receptionistToken: String
     private lateinit var staffToken: String
+    private lateinit var otherStaffToken: String
     private lateinit var service: Service
     private lateinit var staff: Staff
 
@@ -72,10 +73,19 @@ class AppointmentControllerIntegrationTest @Autowired constructor(
                 role = "STAFF"
             )
         )
+        val otherStaffUser = userRepository.save(
+            User(
+                email = "other-staff-appointments@clinic.com",
+                passwordHash = "unused",
+                role = "STAFF"
+            )
+        )
         receptionistToken = jwtUtil.generateToken(receptionist.id, receptionist.role)
         staffToken = jwtUtil.generateToken(staffUser.id, staffUser.role)
+        otherStaffToken = jwtUtil.generateToken(otherStaffUser.id, otherStaffUser.role)
         service = serviceRepository.save(Service(name = "Consultation", price = BigDecimal("150.00"), durationMinutes = 30))
         staff = staffRepository.save(Staff(name = "Dr. Smith", userId = staffUser.id))
+        staffRepository.save(Staff(name = "Dr. Jones", userId = otherStaffUser.id))
     }
 
     @Test
@@ -166,12 +176,12 @@ class AppointmentControllerIntegrationTest @Autowired constructor(
     }
 
     @Test
-    fun `POST appointments creates appointment with JWT`() {
+    fun `POST appointments creates appointment when authenticated staff owns requested staffId`() {
         val start = futureStart()
 
         mockMvc.perform(
             post("/api/appointments")
-                .header("Authorization", "Bearer $receptionistToken")
+                .header("Authorization", "Bearer $staffToken")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(appointmentBody(start = start))
         )
@@ -187,13 +197,39 @@ class AppointmentControllerIntegrationTest @Autowired constructor(
     }
 
     @Test
+    fun `POST appointments returns 403 when authenticated staff creates for another staffId`() {
+        val start = futureStart()
+
+        mockMvc.perform(
+            post("/api/appointments")
+                .header("Authorization", "Bearer $otherStaffToken")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(appointmentBody(start = start, staffId = staff.id))
+        )
+            .andExpect(status().isForbidden)
+    }
+
+    @Test
+    fun `POST appointments returns 403 when authenticated user has no staff mapping`() {
+        val start = futureStart()
+
+        mockMvc.perform(
+            post("/api/appointments")
+                .header("Authorization", "Bearer $receptionistToken")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(appointmentBody(start = start, staffId = staff.id))
+        )
+            .andExpect(status().isForbidden)
+    }
+
+    @Test
     fun `POST appointments rejects overlapping appointment for same staff`() {
         val start = futureStart()
         appointmentRepository.save(appointment("Existing Patient", start, start.plusMinutes(30)))
 
         mockMvc.perform(
             post("/api/appointments")
-                .header("Authorization", "Bearer $receptionistToken")
+                .header("Authorization", "Bearer $staffToken")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(appointmentBody(clientName = "Overlap Patient", start = start.plusMinutes(15), end = start.plusMinutes(45)))
         )
@@ -207,7 +243,7 @@ class AppointmentControllerIntegrationTest @Autowired constructor(
 
         mockMvc.perform(
             post("/api/appointments")
-                .header("Authorization", "Bearer $receptionistToken")
+                .header("Authorization", "Bearer $staffToken")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(appointmentBody(clientName = null, start = start))
         )
@@ -221,7 +257,7 @@ class AppointmentControllerIntegrationTest @Autowired constructor(
 
         mockMvc.perform(
             post("/api/appointments")
-                .header("Authorization", "Bearer $receptionistToken")
+                .header("Authorization", "Bearer $staffToken")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(appointmentBody(start = start, serviceId = null))
         )
@@ -235,7 +271,7 @@ class AppointmentControllerIntegrationTest @Autowired constructor(
 
         mockMvc.perform(
             post("/api/appointments")
-                .header("Authorization", "Bearer $receptionistToken")
+                .header("Authorization", "Bearer $staffToken")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(appointmentBody(clientName = null, start = start, type = "LOCK", serviceId = null))
         )
@@ -249,7 +285,7 @@ class AppointmentControllerIntegrationTest @Autowired constructor(
 
         mockMvc.perform(
             post("/api/appointments")
-                .header("Authorization", "Bearer $receptionistToken")
+                .header("Authorization", "Bearer $staffToken")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(appointmentBody(start = start, type = "BLOCKED"))
         )
@@ -264,7 +300,7 @@ class AppointmentControllerIntegrationTest @Autowired constructor(
 
         mockMvc.perform(
             post("/api/appointments")
-                .header("Authorization", "Bearer $receptionistToken")
+                .header("Authorization", "Bearer $staffToken")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(appointmentBody(start = start, type = "appointment"))
         )
@@ -279,7 +315,7 @@ class AppointmentControllerIntegrationTest @Autowired constructor(
 
         mockMvc.perform(
             post("/api/appointments")
-                .header("Authorization", "Bearer $receptionistToken")
+                .header("Authorization", "Bearer $staffToken")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(appointmentBody(start = start, type = "A".repeat(21)))
         )
@@ -294,7 +330,7 @@ class AppointmentControllerIntegrationTest @Autowired constructor(
 
         mockMvc.perform(
             post("/api/appointments")
-                .header("Authorization", "Bearer $receptionistToken")
+                .header("Authorization", "Bearer $staffToken")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(appointmentBody(start = start, end = start))
         )
@@ -308,7 +344,7 @@ class AppointmentControllerIntegrationTest @Autowired constructor(
 
         mockMvc.perform(
             post("/api/appointments")
-                .header("Authorization", "Bearer $receptionistToken")
+                .header("Authorization", "Bearer $staffToken")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(appointmentBody(clientName = "A".repeat(121), start = start))
         )
@@ -323,7 +359,7 @@ class AppointmentControllerIntegrationTest @Autowired constructor(
 
         mockMvc.perform(
             post("/api/appointments")
-                .header("Authorization", "Bearer $receptionistToken")
+                .header("Authorization", "Bearer $staffToken")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(appointmentBody(start = start, end = start.plusHours(9)))
         )
@@ -332,17 +368,16 @@ class AppointmentControllerIntegrationTest @Autowired constructor(
     }
 
     @Test
-    fun `POST appointments rejects missing staff`() {
+    fun `POST appointments returns 403 before validating unowned staffId`() {
         val start = futureStart()
 
         mockMvc.perform(
             post("/api/appointments")
-                .header("Authorization", "Bearer $receptionistToken")
+                .header("Authorization", "Bearer $staffToken")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(appointmentBody(start = start, staffId = staff.id + 9999))
         )
-            .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.error").value("staffId does not exist"))
+            .andExpect(status().isForbidden)
     }
 
     @Test
@@ -389,11 +424,11 @@ class AppointmentControllerIntegrationTest @Autowired constructor(
     }
 
     @Test
-    fun `DELETE appointment soft deletes and returns updated response`() {
+    fun `DELETE appointment soft deletes when authenticated staff owns appointment`() {
         val start = futureStart()
         val saved = appointmentRepository.save(appointment("Cancel Patient", start, start.plusMinutes(30)))
 
-        mockMvc.perform(delete("/api/appointments/${saved.id}").header("Authorization", "Bearer $receptionistToken"))
+        mockMvc.perform(delete("/api/appointments/${saved.id}").header("Authorization", "Bearer $staffToken"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.id").value(saved.id))
             .andExpect(jsonPath("$.clientName").value("Cancel Patient"))
@@ -404,11 +439,35 @@ class AppointmentControllerIntegrationTest @Autowired constructor(
     }
 
     @Test
+    fun `DELETE appointment returns 403 when authenticated staff does not own appointment`() {
+        val start = futureStart()
+        val saved = appointmentRepository.save(appointment("Other Owner Patient", start, start.plusMinutes(30)))
+
+        mockMvc.perform(delete("/api/appointments/${saved.id}").header("Authorization", "Bearer $otherStaffToken"))
+            .andExpect(status().isForbidden)
+
+        val unchanged = appointmentRepository.findById(saved.id).orElseThrow()
+        assertEquals("ACTIVE", unchanged.status)
+    }
+
+    @Test
+    fun `DELETE appointment returns 403 when authenticated user has no staff mapping`() {
+        val start = futureStart()
+        val saved = appointmentRepository.save(appointment("No Staff Mapping Patient", start, start.plusMinutes(30)))
+
+        mockMvc.perform(delete("/api/appointments/${saved.id}").header("Authorization", "Bearer $receptionistToken"))
+            .andExpect(status().isForbidden)
+
+        val unchanged = appointmentRepository.findById(saved.id).orElseThrow()
+        assertEquals("ACTIVE", unchanged.status)
+    }
+
+    @Test
     fun `DELETE appointment returns 409 when already cancelled`() {
         val start = futureStart()
         val saved = appointmentRepository.save(appointment("Already Cancelled", start, start.plusMinutes(30), status = "CANCELLED"))
 
-        mockMvc.perform(delete("/api/appointments/${saved.id}").header("Authorization", "Bearer $receptionistToken"))
+        mockMvc.perform(delete("/api/appointments/${saved.id}").header("Authorization", "Bearer $staffToken"))
             .andExpect(status().isConflict)
             .andExpect(jsonPath("$.error").value("Appointment is already cancelled"))
     }
@@ -452,7 +511,7 @@ class AppointmentControllerIntegrationTest @Autowired constructor(
                     assertTrue(startRequests.await(5, TimeUnit.SECONDS))
                     val result = mockMvc.perform(
                         post("/api/appointments")
-                            .header("Authorization", "Bearer $receptionistToken")
+                            .header("Authorization", "Bearer $staffToken")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(appointmentBody(clientName = "Concurrent Patient $index", start = start, end = start.plusMinutes(30)))
                     ).andReturn()
