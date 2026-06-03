@@ -44,6 +44,27 @@ class StaffRepositoryTest @Autowired constructor(
     }
 
     @Test
+    fun `findByUserId should return staff mapped to authenticated user`() {
+        staffRepository.save(Staff(name = "Dr. Owner", userId = 10L))
+        staffRepository.save(Staff(name = "Dr. Other", userId = 11L))
+
+        val found = staffRepository.findByUserId(10L)
+
+        assertTrue(found.isPresent)
+        assertEquals("Dr. Owner", found.get().name)
+        assertEquals(10L, found.get().userId)
+    }
+
+    @Test
+    fun `findByUserId should return empty optional when authenticated user is not staff`() {
+        staffRepository.save(Staff(name = "Dr. Owner", userId = 10L))
+
+        val found = staffRepository.findByUserId(999L)
+
+        assertFalse(found.isPresent)
+    }
+
+    @Test
     fun `findAll should return all staff`() {
         staffRepository.save(Staff(name = "Dr. Lee", userId = 3L))
         staffRepository.save(Staff(name = "Dr. Kim", userId = 4L))

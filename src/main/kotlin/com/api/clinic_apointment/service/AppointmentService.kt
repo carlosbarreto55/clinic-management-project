@@ -59,7 +59,7 @@ class AppointmentService(
     }
 
     @Transactional
-    fun createAppointment(request: AppointmentRequest): AppointmentResponse {
+    fun createAppointment(request: AppointmentRequest, authenticatedUserId: Long): AppointmentResponse {
         val startTime = request.startTime ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "startTime is required")
         val type = request.type ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "type is required")
         val staffId = request.staffId ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "staffId is required")
@@ -69,6 +69,11 @@ class AppointmentService(
         }
         if (type == APPOINTMENT && request.clientName.isNullOrBlank()) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "clientName is required for APPOINTMENT")
+        }
+        val currentStaff = staffRepository.findByUserId(authenticatedUserId)
+            .orElseThrow { ResponseStatusException(HttpStatus.FORBIDDEN, "Authenticated user is not mapped to staff") }
+        if (staffId != currentStaff.id) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot create appointment for another staff member")
         }
         if (!staffRepository.existsById(staffId)) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "staffId does not exist")
@@ -106,9 +111,15 @@ class AppointmentService(
     }
 
     @Transactional
-    fun cancelAppointment(id: Long): AppointmentResponse {
+    fun cancelAppointment(id: Long, authenticatedUserId: Long): AppointmentResponse {
+        val currentStaff = staffRepository.findByUserId(authenticatedUserId)
+            .orElseThrow { ResponseStatusException(HttpStatus.FORBIDDEN, "Authenticated user is not mapped to staff") }
         val appointment = appointmentRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found") }
+
+        if (appointment.staffId != currentStaff.id) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot cancel another staff member's appointment")
+        }
 
         if (appointment.status == CANCELLED) {
             throw ResponseStatusException(HttpStatus.CONFLICT, "Appointment is already cancelled")

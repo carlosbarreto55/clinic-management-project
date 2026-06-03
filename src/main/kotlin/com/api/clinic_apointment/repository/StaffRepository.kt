@@ -11,6 +11,8 @@ import java.util.Optional
 
 @Repository
 interface StaffRepository : JpaRepository<Staff, Long> {
+    fun findByUserId(userId: Long): Optional<Staff>
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT s FROM Staff s WHERE s.id = :id")
     fun findByIdForUpdate(@Param("id") id: Long): Optional<Staff>

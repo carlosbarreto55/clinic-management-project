@@ -60,7 +60,7 @@ class SecurityConfigTest @Autowired constructor(
     }
 
     @Test
-    fun `GET appointments with STAFF token is allowed when appointment RBAC flag is disabled by default`() {
+    fun `GET appointments with STAFF token is authenticated without role restriction`() {
         val loginRequest = """{"email":"test@clinic.com","password":"password123"}"""
 
         val loginResponse = mockMvc.perform(

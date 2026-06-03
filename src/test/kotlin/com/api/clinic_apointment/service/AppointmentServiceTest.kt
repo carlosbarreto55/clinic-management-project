@@ -3,6 +3,7 @@ package com.api.clinic_apointment.service
 import com.api.clinic_apointment.dto.AppointmentRequest
 import com.api.clinic_apointment.entity.Appointment
 import com.api.clinic_apointment.entity.Service
+import com.api.clinic_apointment.entity.Staff
 import com.api.clinic_apointment.event.AppointmentEvent
 import com.api.clinic_apointment.repository.AppointmentRepository
 import com.api.clinic_apointment.repository.ServiceRepository
@@ -42,6 +43,8 @@ class AppointmentServiceTest {
     private val service = Service(id = 10L, name = "Consultation", price = BigDecimal("150.00"), durationMinutes = 30)
     private val start = LocalDateTime.of(2026, 6, 3, 9, 0)
     private val end = start.plusMinutes(30)
+    private val authenticatedUserId = 100L
+    private val otherAuthenticatedUserId = 200L
 
     @BeforeEach
     fun resetMocks() {
@@ -51,12 +54,13 @@ class AppointmentServiceTest {
     @Test
     fun `createAppointment creates active appointment and derives endTime from service duration`() {
         val saved = activeAppointment(id = 20L)
+        allowOwner(authenticatedUserId, staffId = 30L)
         `when`(staffRepository.existsById(30L)).thenReturn(true)
         `when`(serviceRepository.findById(service.id)).thenReturn(Optional.of(service))
         `when`(appointmentRepository.findOverlappingForUpdate(30L, start, end)).thenReturn(emptyList())
         `when`(appointmentRepository.save(any(Appointment::class.java))).thenReturn(saved)
 
-        val response = appointmentService.createAppointment(validRequest(endTime = null))
+        val response = appointmentService.createAppointment(validRequest(endTime = null), authenticatedUserId)
 
         val appointmentCaptor = ArgumentCaptor.forClass(Appointment::class.java)
         verify(appointmentRepository).save(appointmentCaptor.capture())
@@ -76,12 +80,13 @@ class AppointmentServiceTest {
     @Test
     fun `createAppointment publishes created event after successful save`() {
         val saved = activeAppointment(id = 20L)
+        allowOwner(authenticatedUserId, staffId = 30L)
         `when`(staffRepository.existsById(30L)).thenReturn(true)
         `when`(serviceRepository.findById(service.id)).thenReturn(Optional.of(service))
         `when`(appointmentRepository.findOverlappingForUpdate(30L, start, end)).thenReturn(emptyList())
         `when`(appointmentRepository.save(any(Appointment::class.java))).thenReturn(saved)
 
-        appointmentService.createAppointment(validRequest())
+        appointmentService.createAppointment(validRequest(), authenticatedUserId)
 
         val captor = ArgumentCaptor.forClass(AppointmentEvent::class.java)
         verify(eventPublisher).publishEvent(captor.capture())
@@ -93,11 +98,12 @@ class AppointmentServiceTest {
 
     @Test
     fun `createAppointment rejects overlapping appointment with conflict`() {
+        allowOwner(authenticatedUserId, staffId = 30L)
         `when`(staffRepository.existsById(30L)).thenReturn(true)
         `when`(serviceRepository.findById(service.id)).thenReturn(Optional.of(service))
         `when`(appointmentRepository.findOverlappingForUpdate(30L, start, end)).thenReturn(listOf(activeAppointment(id = 99L)))
 
-        val ex = assertThrows<ResponseStatusException> { appointmentService.createAppointment(validRequest()) }
+        val ex = assertThrows<ResponseStatusException> { appointmentService.createAppointment(validRequest(), authenticatedUserId) }
 
         assertEquals(HttpStatus.CONFLICT, ex.statusCode)
         verify(appointmentRepository, never()).save(any(Appointment::class.java))
@@ -106,9 +112,10 @@ class AppointmentServiceTest {
 
     @Test
     fun `createAppointment rejects missing staff`() {
+        allowOwner(authenticatedUserId, staffId = 30L)
         `when`(staffRepository.existsById(30L)).thenReturn(false)
 
-        val ex = assertThrows<ResponseStatusException> { appointmentService.createAppointment(validRequest()) }
+        val ex = assertThrows<ResponseStatusException> { appointmentService.createAppointment(validRequest(), authenticatedUserId) }
 
         assertEquals(HttpStatus.BAD_REQUEST, ex.statusCode)
         verify(appointmentRepository, never()).save(any(Appointment::class.java))
@@ -116,10 +123,11 @@ class AppointmentServiceTest {
 
     @Test
     fun `createAppointment rejects missing service for appointment`() {
+        allowOwner(authenticatedUserId, staffId = 30L)
         `when`(staffRepository.existsById(30L)).thenReturn(true)
         `when`(serviceRepository.findById(service.id)).thenReturn(Optional.empty())
 
-        val ex = assertThrows<ResponseStatusException> { appointmentService.createAppointment(validRequest()) }
+        val ex = assertThrows<ResponseStatusException> { appointmentService.createAppointment(validRequest(), authenticatedUserId) }
 
         assertEquals(HttpStatus.BAD_REQUEST, ex.statusCode)
         verify(appointmentRepository, never()).save(any(Appointment::class.java))
@@ -127,6 +135,7 @@ class AppointmentServiceTest {
 
     @Test
     fun `createAppointment rejects missing serviceId for lock`() {
+        allowOwner(authenticatedUserId, staffId = 30L)
         `when`(staffRepository.existsById(30L)).thenReturn(true)
         `when`(appointmentRepository.findOverlappingForUpdate(30L, start, end)).thenReturn(emptyList())
         `when`(appointmentRepository.save(any(Appointment::class.java))).thenReturn(activeAppointment(id = 20L))
@@ -140,7 +149,8 @@ class AppointmentServiceTest {
                     type = "LOCK",
                     serviceId = null,
                     staffId = 30L
-                )
+                ),
+                authenticatedUserId
             )
         }
 
@@ -151,7 +161,7 @@ class AppointmentServiceTest {
     @Test
     fun `createAppointment rejects invalid type`() {
         val ex = assertThrows<ResponseStatusException> {
-            appointmentService.createAppointment(validRequest(type = "BLOCKED"))
+            appointmentService.createAppointment(validRequest(type = "BLOCKED"), authenticatedUserId)
         }
 
         assertEquals(HttpStatus.BAD_REQUEST, ex.statusCode)
@@ -161,7 +171,7 @@ class AppointmentServiceTest {
     @Test
     fun `createAppointment rejects lowercase type`() {
         val ex = assertThrows<ResponseStatusException> {
-            appointmentService.createAppointment(validRequest(type = "appointment"))
+            appointmentService.createAppointment(validRequest(type = "appointment"), authenticatedUserId)
         }
 
         assertEquals(HttpStatus.BAD_REQUEST, ex.statusCode)
@@ -170,13 +180,14 @@ class AppointmentServiceTest {
 
     @Test
     fun `createAppointment rejects missing clientName for appointment`() {
+        allowOwner(authenticatedUserId, staffId = 30L)
         `when`(staffRepository.existsById(30L)).thenReturn(true)
         `when`(serviceRepository.findById(service.id)).thenReturn(Optional.of(service))
         `when`(appointmentRepository.findOverlappingForUpdate(30L, start, end)).thenReturn(emptyList())
         `when`(appointmentRepository.save(any(Appointment::class.java))).thenReturn(activeAppointment(id = 20L))
 
         val ex = assertThrows<ResponseStatusException> {
-            appointmentService.createAppointment(validRequest(clientName = null))
+            appointmentService.createAppointment(validRequest(clientName = null), authenticatedUserId)
         }
 
         assertEquals(HttpStatus.BAD_REQUEST, ex.statusCode)
@@ -185,13 +196,14 @@ class AppointmentServiceTest {
 
     @Test
     fun `createAppointment rejects blank clientName for appointment`() {
+        allowOwner(authenticatedUserId, staffId = 30L)
         `when`(staffRepository.existsById(30L)).thenReturn(true)
         `when`(serviceRepository.findById(service.id)).thenReturn(Optional.of(service))
         `when`(appointmentRepository.findOverlappingForUpdate(30L, start, end)).thenReturn(emptyList())
         `when`(appointmentRepository.save(any(Appointment::class.java))).thenReturn(activeAppointment(id = 20L))
 
         val ex = assertThrows<ResponseStatusException> {
-            appointmentService.createAppointment(validRequest(clientName = "   "))
+            appointmentService.createAppointment(validRequest(clientName = "   "), authenticatedUserId)
         }
 
         assertEquals(HttpStatus.BAD_REQUEST, ex.statusCode)
@@ -200,10 +212,11 @@ class AppointmentServiceTest {
 
     @Test
     fun `createAppointment rejects endTime equal to startTime`() {
+        allowOwner(authenticatedUserId, staffId = 30L)
         `when`(staffRepository.existsById(30L)).thenReturn(true)
         `when`(serviceRepository.findById(service.id)).thenReturn(Optional.of(service))
 
-        val ex = assertThrows<ResponseStatusException> { appointmentService.createAppointment(validRequest(endTime = start)) }
+        val ex = assertThrows<ResponseStatusException> { appointmentService.createAppointment(validRequest(endTime = start), authenticatedUserId) }
 
         assertEquals(HttpStatus.BAD_REQUEST, ex.statusCode)
         verify(appointmentRepository, never()).save(any(Appointment::class.java))
@@ -211,10 +224,13 @@ class AppointmentServiceTest {
 
     @Test
     fun `createAppointment rejects endTime before startTime`() {
+        allowOwner(authenticatedUserId, staffId = 30L)
         `when`(staffRepository.existsById(30L)).thenReturn(true)
         `when`(serviceRepository.findById(service.id)).thenReturn(Optional.of(service))
 
-        val ex = assertThrows<ResponseStatusException> { appointmentService.createAppointment(validRequest(endTime = start.minusMinutes(1))) }
+        val ex = assertThrows<ResponseStatusException> {
+            appointmentService.createAppointment(validRequest(endTime = start.minusMinutes(1)), authenticatedUserId)
+        }
 
         assertEquals(HttpStatus.BAD_REQUEST, ex.statusCode)
         verify(appointmentRepository, never()).save(any(Appointment::class.java))
@@ -283,11 +299,12 @@ class AppointmentServiceTest {
 
     @Test
     fun `createAppointment rejects duration over max appointment window`() {
+        allowOwner(authenticatedUserId, staffId = 30L)
         `when`(staffRepository.existsById(30L)).thenReturn(true)
         `when`(serviceRepository.findById(service.id)).thenReturn(Optional.of(service))
 
         val ex = assertThrows<ResponseStatusException> {
-            appointmentService.createAppointment(validRequest(endTime = start.plusHours(9)))
+            appointmentService.createAppointment(validRequest(endTime = start.plusHours(9)), authenticatedUserId)
         }
 
         assertEquals(HttpStatus.BAD_REQUEST, ex.statusCode)
@@ -295,12 +312,54 @@ class AppointmentServiceTest {
     }
 
     @Test
+    fun `createAppointment allows authenticated staff to create appointment for own staffId`() {
+        val saved = activeAppointment(id = 20L)
+        allowOwner(authenticatedUserId, staffId = 30L)
+        `when`(staffRepository.existsById(30L)).thenReturn(true)
+        `when`(serviceRepository.findById(service.id)).thenReturn(Optional.of(service))
+        `when`(appointmentRepository.findOverlappingForUpdate(30L, start, end)).thenReturn(emptyList())
+        `when`(appointmentRepository.save(any(Appointment::class.java))).thenReturn(saved)
+
+        val response = appointmentService.createAppointment(validRequest(), authenticatedUserId)
+
+        assertEquals(saved.id, response.id)
+        verify(appointmentRepository).save(any(Appointment::class.java))
+    }
+
+    @Test
+    fun `createAppointment rejects authenticated staff creating appointment for another staffId`() {
+        allowOwner(otherAuthenticatedUserId, staffId = 40L)
+
+        val ex = assertThrows<ResponseStatusException> {
+            appointmentService.createAppointment(validRequest(), otherAuthenticatedUserId)
+        }
+
+        assertEquals(HttpStatus.FORBIDDEN, ex.statusCode)
+        verify(appointmentRepository, never()).save(any(Appointment::class.java))
+        verify(eventPublisher, never()).publishEvent(any(AppointmentEvent::class.java))
+    }
+
+    @Test
+    fun `createAppointment rejects authenticated user without staff mapping`() {
+        `when`(staffRepository.findByUserId(authenticatedUserId)).thenReturn(Optional.empty())
+
+        val ex = assertThrows<ResponseStatusException> {
+            appointmentService.createAppointment(validRequest(), authenticatedUserId)
+        }
+
+        assertEquals(HttpStatus.FORBIDDEN, ex.statusCode)
+        verify(appointmentRepository, never()).save(any(Appointment::class.java))
+        verify(eventPublisher, never()).publishEvent(any(AppointmentEvent::class.java))
+    }
+
+    @Test
     fun `cancelAppointment soft deletes appointment and publishes cancelled event`() {
         val appointment = activeAppointment(id = 20L)
+        allowOwner(authenticatedUserId, staffId = appointment.staffId)
         `when`(appointmentRepository.findById(20L)).thenReturn(Optional.of(appointment))
         `when`(appointmentRepository.save(any(Appointment::class.java))).thenAnswer { it.arguments[0] }
 
-        appointmentService.cancelAppointment(20L)
+        appointmentService.cancelAppointment(20L, authenticatedUserId)
 
         val appointmentCaptor = ArgumentCaptor.forClass(Appointment::class.java)
         verify(appointmentRepository).save(appointmentCaptor.capture())
@@ -314,9 +373,10 @@ class AppointmentServiceTest {
 
     @Test
     fun `cancelAppointment rejects missing appointment with not found`() {
+        allowOwner(authenticatedUserId, staffId = 30L)
         `when`(appointmentRepository.findById(20L)).thenReturn(Optional.empty())
 
-        val ex = assertThrows<ResponseStatusException> { appointmentService.cancelAppointment(20L) }
+        val ex = assertThrows<ResponseStatusException> { appointmentService.cancelAppointment(20L, authenticatedUserId) }
 
         assertEquals(HttpStatus.NOT_FOUND, ex.statusCode)
         verify(appointmentRepository, never()).save(any(Appointment::class.java))
@@ -324,14 +384,63 @@ class AppointmentServiceTest {
 
     @Test
     fun `cancelAppointment rejects already cancelled appointment with conflict`() {
+        allowOwner(authenticatedUserId, staffId = 30L)
         `when`(appointmentRepository.findById(20L)).thenReturn(Optional.of(activeAppointment(id = 20L, status = "CANCELLED")))
 
-        val ex = assertThrows<ResponseStatusException> { appointmentService.cancelAppointment(20L) }
+        val ex = assertThrows<ResponseStatusException> { appointmentService.cancelAppointment(20L, authenticatedUserId) }
 
         assertEquals(HttpStatus.CONFLICT, ex.statusCode)
         verify(appointmentRepository, never()).save(any(Appointment::class.java))
         verify(eventPublisher, never()).publishEvent(any(AppointmentEvent::class.java))
     }
+
+    @Test
+    fun `cancelAppointment allows authenticated staff to cancel own appointment`() {
+        val appointment = activeAppointment(id = 20L)
+        allowOwner(authenticatedUserId, staffId = appointment.staffId)
+        `when`(appointmentRepository.findById(20L)).thenReturn(Optional.of(appointment))
+        `when`(appointmentRepository.save(any(Appointment::class.java))).thenAnswer { it.arguments[0] }
+
+        val response = appointmentService.cancelAppointment(20L, authenticatedUserId)
+
+        assertEquals("CANCELLED", response.status)
+        verify(appointmentRepository).save(any(Appointment::class.java))
+    }
+
+    @Test
+    fun `cancelAppointment rejects authenticated staff cancelling another staff appointment`() {
+        val appointment = activeAppointment(id = 20L, staffId = 30L)
+        allowOwner(otherAuthenticatedUserId, staffId = 40L)
+        `when`(appointmentRepository.findById(20L)).thenReturn(Optional.of(appointment))
+
+        val ex = assertThrows<ResponseStatusException> {
+            appointmentService.cancelAppointment(20L, otherAuthenticatedUserId)
+        }
+
+        assertEquals(HttpStatus.FORBIDDEN, ex.statusCode)
+        verify(appointmentRepository, never()).save(any(Appointment::class.java))
+        verify(eventPublisher, never()).publishEvent(any(AppointmentEvent::class.java))
+    }
+
+    @Test
+    fun `cancelAppointment rejects authenticated user without staff mapping`() {
+        `when`(staffRepository.findByUserId(authenticatedUserId)).thenReturn(Optional.empty())
+        `when`(appointmentRepository.findById(20L)).thenReturn(Optional.of(activeAppointment(id = 20L)))
+
+        val ex = assertThrows<ResponseStatusException> {
+            appointmentService.cancelAppointment(20L, authenticatedUserId)
+        }
+
+        assertEquals(HttpStatus.FORBIDDEN, ex.statusCode)
+        verify(appointmentRepository, never()).save(any(Appointment::class.java))
+        verify(eventPublisher, never()).publishEvent(any(AppointmentEvent::class.java))
+    }
+
+    private fun allowOwner(userId: Long, staffId: Long) {
+        `when`(staffRepository.findByUserId(userId)).thenReturn(Optional.of(staff(staffId, userId)))
+    }
+
+    private fun staff(id: Long, userId: Long) = Staff(id = id, name = "Dr. Owner $id", userId = userId)
 
     private fun validRequest(
         clientName: String? = "John Doe",
@@ -346,7 +455,7 @@ class AppointmentServiceTest {
         staffId = 30L
     )
 
-    private fun activeAppointment(id: Long, status: String = "ACTIVE") = Appointment(
+    private fun activeAppointment(id: Long, status: String = "ACTIVE", staffId: Long = 30L) = Appointment(
         id = id,
         clientName = "John Doe",
         startTime = start,
@@ -354,6 +463,6 @@ class AppointmentServiceTest {
         status = status,
         type = "APPOINTMENT",
         serviceId = service.id,
-        staffId = 30L
+        staffId = staffId
     )
 }

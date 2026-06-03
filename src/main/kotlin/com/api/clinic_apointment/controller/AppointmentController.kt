@@ -7,6 +7,7 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.Positive
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.Authentication
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -31,13 +32,19 @@ class AppointmentController(private val appointmentService: AppointmentService) 
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun createAppointment(@Valid @RequestBody request: AppointmentRequest): AppointmentResponse {
-        return appointmentService.createAppointment(request)
+    fun createAppointment(
+        @Valid @RequestBody request: AppointmentRequest,
+        authentication: Authentication
+    ): AppointmentResponse {
+        return appointmentService.createAppointment(request, authentication.name.toLong())
     }
 
     @GetMapping("/{id}")
     fun getAppointment(@Positive @PathVariable id: Long): AppointmentResponse = appointmentService.getAppointment(id)
 
     @DeleteMapping("/{id}")
-    fun deleteAppointment(@Positive @PathVariable id: Long): AppointmentResponse = appointmentService.cancelAppointment(id)
+    fun deleteAppointment(
+        @Positive @PathVariable id: Long,
+        authentication: Authentication
+    ): AppointmentResponse = appointmentService.cancelAppointment(id, authentication.name.toLong())
 }
