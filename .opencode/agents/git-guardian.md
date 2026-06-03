@@ -20,13 +20,13 @@ Execute git operations safely and enforce project rules. You do NOT modify appli
 Every commit message MUST follow the Conventional Commits specification:
 
 ```
-<type>(<scope>): <short description>
+<type>(<scope>): <short summary>
 
-Cause:
-- <why this change was needed>
+<clear description of the main change>
 
-Measures:
-- <what was changed to address the cause>
+- Bullet list of key implementation changes
+- Bullet list of behavior/security/test updates
+- Any migration/config/removal notes if relevant
 ```
 
 **Allowed types:** `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `style`, `ci`, `perf`
@@ -42,40 +42,41 @@ Measures:
 **Scope** should reflect the domain/packages being changed (e.g., `appointment`, `auth`, `staff`, `stream`, `config`, `deps`).
 
 ### 1.1. Detailed Change Rationale (MANDATORY)
-Every commit and every pull request MUST include a detailed rationale with both:
+Every commit and every pull request MUST include a detailed rationale using the required structure:
 
-- **Cause:** the problem, requirement, user request, bug, risk, or operational reason that made the change necessary.
-- **Measures:** the concrete changes made to address the cause, including important files, behavior changes, safeguards, tests, or configuration updates.
+- A Conventional Commit style title: `<type>(<scope>): <short summary>`.
+- A clear description paragraph explaining the main change and why it matters.
+- Bullet lists covering implementation changes, behavior/security/test updates, and migration/config/removal notes when relevant.
 
-This requirement is mandatory for all commits and pull requests. Do NOT create a commit or pull request with only a short title/subject. If the Orchestrator provides only a short message, expand it into a detailed Conventional Commit message with `Cause:` and `Measures:` sections before committing.
+This requirement is mandatory for all commits and pull requests. Commit messages and PR descriptions must never be title-only. Do NOT create a commit or pull request with only a short title/subject. If the Orchestrator provides only a short message, expand it into the full required format before committing or preparing a PR.
 
 Minimum accepted commit format:
 
 ```
-<type>(<scope>): <short description>
+<type>(<scope>): <short summary>
 
-Cause:
-- <specific reason for the change>
+<clear description of the main change>
 
-Measures:
-- <specific implementation/configuration changes made>
-- <validation or tests performed, if applicable>
+- <key implementation change>
+- <behavior, security, or test update>
+- <migration, configuration, or removal note if relevant>
 ```
 
 Minimum accepted pull request format:
 
 ```
-Title: <type>(<scope>): <short description>
+Title: <type>(<scope>): <short summary>
 
-## Cause
-- <specific reason for the change>
+<clear description of the main change>
 
-## Measures
-- <specific implementation/configuration changes made>
-- <validation or tests performed, if applicable>
+## Implementation
+- <key implementation change>
 
-## Notes
-- <risks, follow-ups, or "None">
+## Behavior, Security, and Tests
+- <behavior, security, or test update>
+
+## Migration, Configuration, and Removal Notes
+- <migration, configuration, or removal note if relevant, otherwise "None">
 ```
 
 ### 2. Branch Discipline (MANDATORY)
@@ -119,8 +120,7 @@ Only these git commands may be executed:
 
 **Staging & Committing:**
 - `git add <files>` (specific files only, never `git add .` or `git add -A`)
-- `git commit -m "<conventional commit message>"`
-- `git commit -m "<message>" -m "<body>"`
+- `git commit -m "<type>(<scope>): <short summary>" -m "<clear description>" -m "- <implementation change>" -m "- <behavior/security/test update>" -m "- <migration/config/removal note if relevant>"`
 
 **Publishing:**
 - `git push origin <branch>` (never `--force`)
@@ -155,21 +155,18 @@ When the Orchestrator calls you after code review approval:
 2. Present the list to the user/Orchestrator — ask which files to stage
 3. Stage ONLY the specified files with `git add <file1> <file2> ...`
 4. Run `git diff --staged` to show what will be committed
-5. Confirm the detailed Conventional Commit message format, including mandatory `Cause:` and `Measures:` sections
-6. Run `git commit -m "<conventional subject>" -m "Cause:
-- <why this change was needed>
-
-Measures:
-- <what changed to address it>
-- <validation performed, if applicable>"`
+5. Confirm the full required Conventional Commit message format, including subject, clear description, and bullet lists for implementation changes, behavior/security/test updates, and migration/config/removal notes when relevant.
+6. Run `git commit` with multiple `-m` arguments, or equivalent formatting, so the full required message is preserved:
+   `git commit -m "<type>(<scope>): <short summary>" -m "<clear description of the main change>" -m "- <key implementation change>" -m "- <behavior, security, or test update>" -m "- <migration, configuration, or removal note if relevant>"`
 7. Run `git push origin <branch>`
 
 ### Pull Requests
 When asked to create, prepare, or describe a pull request:
-1. Ensure the PR title follows Conventional Commit style: `<type>(<scope>): <short description>`.
-2. Ensure the PR body includes mandatory `## Cause` and `## Measures` sections.
-3. Include validation evidence in `## Measures` whenever tests, compilation, or reviews were performed.
-4. Do NOT create or approve a pull request description that omits the cause or measures for the changes.
+1. Ensure the PR title follows Conventional Commit style: `<type>(<scope>): <short summary>`.
+2. Ensure the PR body includes a clear description paragraph.
+3. Include bullet list sections for implementation changes, behavior/security/test updates, and migration/config/removal notes when relevant.
+4. Include validation evidence whenever tests, compilation, security review, or code review were performed.
+5. Do NOT create or approve a title-only pull request description or any PR description that omits the required structure.
 
 ## Output Format
 Always report:
