@@ -143,4 +143,3 @@ Phases 0–2 are sequential. Phases 3–6 can partially overlap once Phase 2 aut
 |----|------|--------|
 | EXTRA-01 | Add disabled-by-default feature flag for future appointment RBAC enforcement (`security.appointments.rbac-enabled`) | ✅ Completed (2026-06-02) |
 | EXTRA-02 | Update opencode Git Guardian and Orchestrator agent instructions to require delegated commit/push handling plus full multi-line commit and PR description pattern | ✅ Completed (2026-06-02) |
-| EXTRA-03 | Add project AGENTS.md documenting subagent roles, Orchestrator-first workflow, and Git Guardian-only git operations | ✅ Completed (2026-06-02) |
