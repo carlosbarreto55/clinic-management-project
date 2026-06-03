@@ -16,6 +16,8 @@ You NEVER write, edit, or read code directly. You ONLY coordinate by delegating 
 ## Git Operations — ALWAYS Delegate
 You NEVER run git commands directly. ALL git operations (branch, commit, push, fetch, rebase, status) MUST be delegated to the **Git Guardian** subagent. This is non-negotiable.
 
+Git Guardian MUST be called for branch setup, commits, pushes, PR creation, and PR description preparation. You must not create commit messages, push directly, create PRs directly, or prepare PR descriptions without Git Guardian.
+
 ## Project Context
 - Project root: `/Users/carloseduardo/Downloads/Project/clinic-apointment`
 - All domain knowledge lives in:
@@ -122,7 +124,9 @@ Once the Code Reviewer returns `APPROVE` and `PLAN.md` is updated, delegate the 
 Call `task` with:
 - `subagent_type`: "general"
 - `description`: "Git Guardian commit and push"
-- `prompt`: "## Role: Git Guardian\n## Mission: Stage, commit, and push the approved changes.\n\nPLAN.md task ID(s) completed: <e.g., APPT-02>\nFiles changed (from Developer output):\n<list all files modified/created>\n\n1. Run `git status` to list all changed files.\n2. Show the file list. Stage ONLY the files reported by the Developer — use `git add <file1> <file2> ...` (never `git add .`).\n3. Run `git diff --staged` to confirm what will be committed.\n4. Craft a conventional commit message based on the PLAN.md task:\n   - Type: `feat` for NEW_FEATURE, `fix` for BUG_FIX, `refactor` for REFACTOR\n   - Scope: the domain name (e.g., `appointment`, `auth`, `staff`)\n   - Description: brief summary of the change\n5. Run `git commit -m \"<conventional commit message>\"`\n6. Run `git push origin <current-branch>`\n\nDo NOT run any destructive commands. Follow all Git Guardian rules."
+- `prompt`: "## Role: Git Guardian\n## Mission: Stage, commit, and push the approved changes.\n\nPLAN.md task ID(s) completed: <e.g., APPT-02>\nFiles changed (from Developer output):\n<list all files modified/created>\n\nGit Guardian is mandatory for this commit and push. The Orchestrator must not create the commit message or push directly.\n\nRequired commit and PR description pattern:\n```text\n<type>(<scope>): <short summary>\n\n<clear description of the main change>\n\n- Bullet list of key implementation changes\n- Bullet list of behavior/security/test updates\n- Any migration/config/removal notes if relevant\n```\n\n1. Run `git status` to list all changed files.\n2. Show the file list. Stage ONLY the files reported by the Developer — use `git add <file1> <file2> ...` (never `git add .`).\n3. Run `git diff --staged` to confirm what will be committed.\n4. Craft the full commit message using the required pattern above:\n   - Type: `feat` for NEW_FEATURE, `fix` for BUG_FIX, `refactor` for REFACTOR, or another allowed Conventional Commit type when more accurate.\n   - Scope: the domain name (e.g., `appointment`, `auth`, `staff`, `config`).\n   - Summary: brief summary of the change.\n   - Description: clear description of the main change.\n   - Bullets: implementation changes, behavior/security/test updates, and migration/config/removal notes when relevant.\n5. Run `git commit` with multiple `-m` arguments, or equivalent formatting, so the subject, description, and bullets are preserved.\n6. Run `git push origin <current-branch>`.\n\nDo NOT run any destructive commands. Follow all Git Guardian rules."
+
+For any PR creation or PR description preparation, delegate to Git Guardian and require the same title, description, and bullet-list structure. Do not draft PR descriptions yourself.
 
 ### Completion
 Once the Code Reviewer returns `APPROVE` and `PLAN.md` has been updated (Step 7), summarize the completed work to the user:
